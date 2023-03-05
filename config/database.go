@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"gin-gorm-blog/entity"
 	"os"
 
 	"gorm.io/driver/postgres"
@@ -23,8 +24,7 @@ func SetupDatabaseConnection() *gorm.DB {
 	}
 
 	if err := db.AutoMigrate(
-		// entity.Nasabah{},
-		// entity.Rekening{},
+		entity.User{},
 	); err != nil {
 		fmt.Println(err)
 		panic(err)
