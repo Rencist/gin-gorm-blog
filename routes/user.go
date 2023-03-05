@@ -9,6 +9,6 @@ import (
 func UserRoutes(router *gin.Engine, UserController controller.UserController) {
 	userRoutes := router.Group("/api/user")
 	{
-		userRoutes.POST("", UserController.CreateUser)
+		userRoutes.POST("", UserController.RegisterUser)
 	}
 }

@@ -13,6 +13,7 @@ type User struct {
 	Email 		string 		`json:"email" binding:"email"`
 	NoTelp 		string 		`json:"no_telp"`
 	Password 	string  	`json:"password"`
+	Role		string		`json:"role"`
 	
 	Blogs 		[]Blog 	`gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"blogs,omitempty"`
 	

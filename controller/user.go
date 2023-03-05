@@ -10,7 +10,8 @@ import (
 )
 
 type UserController interface {
-	CreateUser(ctx *gin.Context)
+	RegisterUser(ctx *gin.Context)
+	LoginUser(ctx *gin.Context)
 }
 
 type userController struct {
@@ -23,7 +24,7 @@ func NewUserController(us service.UserService) UserController {
 	}
 }
 
-func(uc *userController) CreateUser(ctx *gin.Context) {
+func(uc *userController) RegisterUser(ctx *gin.Context) {
 	var user dto.UserCreateDto
 	err := ctx.ShouldBind(&user)
 	if err != nil {
@@ -31,7 +32,7 @@ func(uc *userController) CreateUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
-	result, err := uc.userService.CreateUser(ctx.Request.Context(), user)
+	result, err := uc.userService.RegisterUser(ctx.Request.Context(), user)
 	if err != nil {
 		res := common.BuildErrorResponse("Gagal Menambahkan User", err.Error(), common.EmptyObj{})
 		ctx.JSON(http.StatusBadRequest, res)
@@ -40,4 +41,8 @@ func(uc *userController) CreateUser(ctx *gin.Context) {
 
 	res := common.BuildResponse(true, "Berhasil Menambahkan User", result)
 	ctx.JSON(http.StatusOK, res)
+}
+
+func(uc *userController) LoginUser(ctx *gin.Context) {
+	
 }

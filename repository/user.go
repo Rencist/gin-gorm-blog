@@ -9,7 +9,7 @@ import (
 )
 
 type UserRepository interface {
-	CreateUser(ctx context.Context, user entity.User) (entity.User, error)
+	RegisterUser(ctx context.Context, user entity.User) (entity.User, error)
 }
 
 type userConnection struct {
@@ -22,7 +22,7 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 	}
 }
 
-func(db *userConnection) CreateUser(ctx context.Context, user entity.User) (entity.User, error) {
+func(db *userConnection) RegisterUser(ctx context.Context, user entity.User) (entity.User, error) {
 	user.ID = uuid.New()
 	uc := db.connection.Create(&user)
 	if uc.Error != nil {

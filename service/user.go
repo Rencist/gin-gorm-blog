@@ -10,7 +10,7 @@ import (
 )
 
 type UserService interface {
-	CreateUser(ctx context.Context, userDTO dto.UserCreateDto) (entity.User, error)
+	RegisterUser(ctx context.Context, userDTO dto.UserCreateDto) (entity.User, error)
 }
 
 type userService struct {
@@ -23,11 +23,12 @@ func NewUserService(ur repository.UserRepository) UserService {
 	}
 }
 
-func(us *userService) CreateUser(ctx context.Context, userDTO dto.UserCreateDto) (entity.User, error) {
+func(us *userService) RegisterUser(ctx context.Context, userDTO dto.UserCreateDto) (entity.User, error) {
 	user := entity.User{}
 	err := smapping.FillStruct(&user, smapping.MapFields(userDTO))
+	user.Role = "user"
 	if err != nil {
 		return user, err
 	}
-	return us.userRepository.CreateUser(ctx, user)
+	return us.userRepository.RegisterUser(ctx, user)
 }
