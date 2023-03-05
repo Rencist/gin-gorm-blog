@@ -10,6 +10,7 @@ import (
 
 type UserRepository interface {
 	RegisterUser(ctx context.Context, user entity.User) (entity.User, error)
+	GetAllUser(ctx context.Context) ([]entity.User, error)
 }
 
 type userConnection struct {
@@ -29,4 +30,13 @@ func(db *userConnection) RegisterUser(ctx context.Context, user entity.User) (en
 		return entity.User{}, uc.Error
 	}
 	return user, nil
+}
+
+func(db *userConnection) GetAllUser(ctx context.Context) ([]entity.User, error) {
+	var listUser []entity.User
+	tx := db.connection.Find(&listUser)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return listUser, nil
 }

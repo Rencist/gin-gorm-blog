@@ -11,6 +11,7 @@ import (
 
 type UserService interface {
 	RegisterUser(ctx context.Context, userDTO dto.UserCreateDto) (entity.User, error)
+	GetAllUser(ctx context.Context) ([]entity.User, error)
 }
 
 type userService struct {
@@ -31,4 +32,8 @@ func(us *userService) RegisterUser(ctx context.Context, userDTO dto.UserCreateDt
 		return user, err
 	}
 	return us.userRepository.RegisterUser(ctx, user)
+}
+
+func(us *userService) GetAllUser(ctx context.Context) ([]entity.User, error) {
+	return us.userRepository.GetAllUser(ctx)
 }

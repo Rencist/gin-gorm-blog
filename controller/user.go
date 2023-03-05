@@ -11,7 +11,7 @@ import (
 
 type UserController interface {
 	RegisterUser(ctx *gin.Context)
-	LoginUser(ctx *gin.Context)
+	GetAllUser(ctx *gin.Context)
 }
 
 type userController struct {
@@ -43,6 +43,14 @@ func(uc *userController) RegisterUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-func(uc *userController) LoginUser(ctx *gin.Context) {
-	
+func(uc *userController) GetAllUser(ctx *gin.Context) {
+	result, err := uc.userService.GetAllUser(ctx.Request.Context())
+	if err != nil {
+		res := common.BuildErrorResponse("Gagal Mendapatkan List User", err.Error(), common.EmptyObj{})
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	res := common.BuildResponse(true, "Berhasil Mendapatkan List User", result)
+	ctx.JSON(http.StatusOK, res)
 }
