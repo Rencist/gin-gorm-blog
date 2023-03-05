@@ -1,8 +1,6 @@
 package entity
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 )
 
@@ -12,6 +10,5 @@ type Tag struct {
 
 	BlogTags 			[]BlogTag 	`gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"blog_tags,omitempty"`
 	
-	CreatedAt 			time.Time 	`json:"created_at" default:"CURRENT_TIMESTAMP"`
-	UpdatedAt 			time.Time 	`json:"updated_at"`
+	Timestamp
 }

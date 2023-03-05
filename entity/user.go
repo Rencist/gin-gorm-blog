@@ -1,8 +1,6 @@
 package entity
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 )
 
@@ -15,6 +13,5 @@ type User struct {
 	
 	Blogs 		[]Blog 	`gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"blogs,omitempty"`
 	
-	CreatedAt 	time.Time 	`json:"created_at" default:"CURRENT_TIMESTAMP"`
-	UpdatedAt 	time.Time 	`json:"updated_at"`
+	Timestamp
 }
