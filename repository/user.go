@@ -11,6 +11,7 @@ import (
 type UserRepository interface {
 	RegisterUser(ctx context.Context, user entity.User) (entity.User, error)
 	GetAllUser(ctx context.Context) ([]entity.User, error)
+	FindUserByEmail(ctx context.Context, email string) (entity.User, error)
 }
 
 type userConnection struct {
@@ -39,4 +40,13 @@ func(db *userConnection) GetAllUser(ctx context.Context) ([]entity.User, error) 
 		return nil, tx.Error
 	}
 	return listUser, nil
+}
+
+func(db *userConnection) FindUserByEmail(ctx context.Context, email string) (entity.User, error) {
+	var user entity.User
+	ux := db.connection.Where("email = ?", email).Take(&user)
+	if ux.Error != nil {
+		return user, ux.Error
+	}
+	return user, nil
 }

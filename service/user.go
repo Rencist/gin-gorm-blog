@@ -12,6 +12,7 @@ import (
 type UserService interface {
 	RegisterUser(ctx context.Context, userDTO dto.UserCreateDto) (entity.User, error)
 	GetAllUser(ctx context.Context) ([]entity.User, error)
+	FindUserByEmail(ctx context.Context, email string) (entity.User, error)
 }
 
 type userService struct {
@@ -36,4 +37,8 @@ func(us *userService) RegisterUser(ctx context.Context, userDTO dto.UserCreateDt
 
 func(us *userService) GetAllUser(ctx context.Context) ([]entity.User, error) {
 	return us.userRepository.GetAllUser(ctx)
+}
+
+func(us *userService) FindUserByEmail(ctx context.Context, email string) (entity.User, error) {
+	return us.userRepository.FindUserByEmail(ctx, email)
 }
