@@ -3,6 +3,7 @@ package controller
 import (
 	"gin-gorm-blog/common"
 	"gin-gorm-blog/dto"
+	"gin-gorm-blog/entity"
 	"gin-gorm-blog/service"
 	"net/http"
 
@@ -12,23 +13,27 @@ import (
 type UserController interface {
 	RegisterUser(ctx *gin.Context)
 	GetAllUser(ctx *gin.Context)
+	LoginUser(ctx *gin.Context)
 }
 
 type userController struct {
+	jwtService service.JWTService
 	userService service.UserService
 }
 
-func NewUserController(us service.UserService) UserController {
+func NewUserController(us service.UserService, jwts service.JWTService) UserController {
 	return &userController{
 		userService: us,
+		jwtService: jwts,
 	}
 }
 
 func(uc *userController) RegisterUser(ctx *gin.Context) {
 	var user dto.UserCreateDto
 	err := ctx.ShouldBind(&user)
-	if err != nil {
-		res := common.BuildErrorResponse("Gagal Menambahkan User", err.Error(), common.EmptyObj{})
+	checkUser, _ := uc.userService.CheckUser(ctx.Request.Context(), user.Email)
+	if checkUser {
+		res := common.BuildErrorResponse("User Sudah Terdaftar", "false", common.EmptyObj{})
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
@@ -53,4 +58,30 @@ func(uc *userController) GetAllUser(ctx *gin.Context) {
 
 	res := common.BuildResponse(true, "Berhasil Mendapatkan List User", result)
 	ctx.JSON(http.StatusOK, res)
+}
+
+func(uc *userController) LoginUser(ctx *gin.Context) {
+	var userLoginDTO dto.UserLoginDTO
+	err := ctx.ShouldBind(&userLoginDTO)
+	res, _ := uc.userService.Verify(ctx.Request.Context(), userLoginDTO.Email, userLoginDTO.Password)
+	if !res {
+		response := common.BuildErrorResponse("Gagal Login", "Email atau Password Salah", common.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	
+	user, err := uc.userService.FindUserByEmail(ctx.Request.Context(), userLoginDTO.Email)
+	if err != nil {
+		response := common.BuildErrorResponse("Gagal Login", err.Error(), common.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	token := uc.jwtService.GenerateToken(user.ID, user.Role)
+	userResponse := entity.Authorization{
+		Token: token,
+		Role: user.Role,
+	}
+	
+	response := common.BuildResponse(true, "Berhasil Login", userResponse)
+	ctx.JSON(http.StatusOK, response)
 }

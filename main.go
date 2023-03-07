@@ -26,9 +26,11 @@ func main() {
 	var (
 		db *gorm.DB = config.SetupDatabaseConnection()
 		
+		jwtService service.JWTService = service.NewJWTService()
+
 		userRepository repository.UserRepository = repository.NewUserRepository(db)
 		userService service.UserService = service.NewUserService(userRepository)
-		userController controller.UserController = controller.NewUserController(userService)
+		userController controller.UserController = controller.NewUserController(userService, jwtService)
 	)
 
 	server := gin.Default()
@@ -38,5 +40,5 @@ func main() {
 	if port == "" {
 		port = "8000"
 	}
-	server.Run("localhost:" + port)
+	server.Run("127.0.0.1:" + port)
 }

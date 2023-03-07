@@ -11,14 +11,14 @@ import (
 )
 
 type JWTService interface {
-	GenerateToken(teamID uuid.UUID, role string) string
+	GenerateToken(userID uuid.UUID, role string) string
 	ValidateToken(token string) (*jwt.Token, error)
 	GetUserIDByToken(token string) (uuid.UUID, error)
 }
 
 type jwtCustomClaim struct {
-	UserID uuid.UUID 	`json:"user_id"`
-	Role   string 		`json:"role"`
+	UserID uuid.UUID 		`json:"user_id"`
+	Role   string 			`json:"role"`
 	jwt.RegisteredClaims
 }
 
