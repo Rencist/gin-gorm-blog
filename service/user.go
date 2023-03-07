@@ -19,6 +19,7 @@ type UserService interface {
 	CheckUser(ctx context.Context, email string) ( bool, error)
 	DeleteUser(ctx context.Context, userID uuid.UUID) (error)
 	UpdateUser(ctx context.Context, userDTO dto.UserUpdateDto) (error)
+	MeUser(ctx context.Context, userID uuid.UUID) (entity.User, error)
 }
 
 type userService struct {
@@ -87,4 +88,8 @@ func(us *userService) UpdateUser(ctx context.Context, userDTO dto.UserUpdateDto)
 		return err
 	}
 	return us.userRepository.UpdateUser(ctx, user)
+}
+
+func(us *userService) MeUser(ctx context.Context, userID uuid.UUID) (entity.User, error) {
+	return us.userRepository.FindUserByID(ctx, userID)
 }

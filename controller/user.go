@@ -16,6 +16,7 @@ type UserController interface {
 	LoginUser(ctx *gin.Context)
 	DeleteUser(ctx *gin.Context)
 	UpdateUser(ctx *gin.Context)
+	MeUser(ctx *gin.Context)
 }
 
 type userController struct {
@@ -133,5 +134,25 @@ func(uc *userController) UpdateUser(ctx *gin.Context) {
 		return
 	}
 	res := common.BuildResponse(true, "Berhasil Mengupdate User", common.EmptyObj{})
+	ctx.JSON(http.StatusOK, res)
+}
+
+func(uc *userController) MeUser(ctx *gin.Context) {
+	token := ctx.MustGet("token").(string)
+	userID, err := uc.jwtService.GetUserIDByToken(token)
+	if err != nil {
+		response := common.BuildErrorResponse("Gagal Memproses Request", "Token Tidak Valid", nil)
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
+		return
+	}
+
+	result, err := uc.userService.MeUser(ctx.Request.Context(), userID)
+	if err != nil {
+		res := common.BuildErrorResponse("Gagal Mendapatkan User", err.Error(), common.EmptyObj{})
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	res := common.BuildResponse(true, "Berhasil Mendapatkan User", result)
 	ctx.JSON(http.StatusOK, res)
 }
