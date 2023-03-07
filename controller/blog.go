@@ -12,6 +12,7 @@ import (
 type BlogController interface {
 	CreateBlog(ctx *gin.Context)
 	GetAllBlog(ctx *gin.Context)
+	GetUserBlog(ctx *gin.Context)
 }
 
 type blogController struct {
@@ -62,5 +63,18 @@ func(bc *blogController) GetAllBlog(ctx *gin.Context) {
 	}
 
 	res := common.BuildResponse(true, "Berhasil Mendapatkan List Blog", result)
+	ctx.JSON(http.StatusOK, res)
+}
+
+func(bc *blogController) GetUserBlog(ctx *gin.Context) {
+	UserID := ctx.Param("id")
+	result, err := bc.blogService.GetUserBlog(ctx.Request.Context(), UserID)
+	if err != nil {
+		res := common.BuildErrorResponse("Gagal Mendapatkan User", err.Error(), common.EmptyObj{})
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	res := common.BuildResponse(true, "Berhasil Mendapatkan User", result)
 	ctx.JSON(http.StatusOK, res)
 }

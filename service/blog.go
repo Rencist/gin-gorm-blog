@@ -12,6 +12,7 @@ import (
 type BlogService interface {
 	CreateBlog(ctx context.Context, blogDTO dto.BlogCreateDto) (entity.Blog, error)
 	GetAllBlog(ctx context.Context) ([]entity.Blog, error)
+	GetUserBlog(ctx context.Context, userID string) ([]entity.Blog, error)
 }
 
 type blogService struct {
@@ -35,4 +36,8 @@ func(bs *blogService) CreateBlog(ctx context.Context, blogDTO dto.BlogCreateDto)
 
 func(bs *blogService) GetAllBlog(ctx context.Context) ([]entity.Blog, error) {
 	return bs.blogRepository.GetAllBlog(ctx)
+}
+
+func(bs *blogService) GetUserBlog(ctx context.Context, userID string) ([]entity.Blog, error) {
+	return bs.blogRepository.FindBlogByUserID(ctx, userID)
 }
