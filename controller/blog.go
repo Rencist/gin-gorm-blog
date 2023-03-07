@@ -14,6 +14,7 @@ type BlogController interface {
 	GetAllBlog(ctx *gin.Context)
 	GetUserBlog(ctx *gin.Context)
 	GetBlogByID(ctx *gin.Context)
+	LikeBlogByID(ctx *gin.Context)
 }
 
 type blogController struct {
@@ -95,5 +96,18 @@ func(bc *blogController) GetBlogByID(ctx *gin.Context) {
 	}
 
 	res := common.BuildResponse(true, "Berhasil Mendapatkan Blog", result)
+	ctx.JSON(http.StatusOK, res)
+}
+
+func(bc *blogController) LikeBlogByID(ctx *gin.Context) {
+	BlogID := ctx.Param("id")
+	err := bc.blogService.LikeBlogByID(ctx.Request.Context(), BlogID)
+	if err != nil {
+		res := common.BuildErrorResponse("Gagal Like Blog", "Blog Tidak Ditemukan", common.EmptyObj{})
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	res := common.BuildResponse(true, "Berhasil Like Blog", common.EmptyObj{})
 	ctx.JSON(http.StatusOK, res)
 }

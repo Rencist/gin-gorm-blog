@@ -14,6 +14,7 @@ type BlogService interface {
 	GetAllBlog(ctx context.Context) ([]entity.Blog, error)
 	GetUserBlog(ctx context.Context, userID string) ([]entity.Blog, error)
 	GetBlogByID(ctx context.Context, blogID string) (entity.Blog, error)
+	LikeBlogByID(ctx context.Context, blogID string) (error)
 }
 
 type blogService struct {
@@ -45,4 +46,8 @@ func(bs *blogService) GetUserBlog(ctx context.Context, userID string) ([]entity.
 
 func(bs *blogService) GetBlogByID(ctx context.Context, blogID string) (entity.Blog, error) {
 	return bs.blogRepository.FindBlogByID(ctx, blogID)
+}
+
+func(bs *blogService) LikeBlogByID(ctx context.Context, blogID string) (error) {
+	return bs.blogRepository.LikeBlogByID(ctx, blogID)
 }
