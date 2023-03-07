@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"gin-gorm-blog/common"
+	"gin-gorm-blog/dto"
 	"gin-gorm-blog/entity"
 
 	"github.com/google/uuid"
@@ -9,6 +11,7 @@ import (
 )
 
 type BlogRepository interface {
+	GetTotalData(ctx context.Context) (int64, error)
 	CreateBlog(ctx context.Context, blog entity.Blog) (entity.Blog, error)
 	GetAllBlog(ctx context.Context) ([]entity.Blog, error)
 	FindBlogByUserID(ctx context.Context, userID string) ([]entity.Blog, error)
@@ -16,6 +19,7 @@ type BlogRepository interface {
 	UpdateBlog(ctx context.Context, blog entity.Blog) (error)
 	LikeBlogByID(ctx context.Context, blogID string) (error)
 	CheckBlogCommentByID(ctx context.Context, blogID string) (entity.Blog, error)
+	GetAllBlogPagination(ctx context.Context, pagination entity.Pagination) (dto.PaginationResponse, error)
 }
 
 type blogConnection struct {
@@ -26,6 +30,15 @@ func NewBlogRepository(db *gorm.DB) BlogRepository {
 	return &blogConnection{
 		connection: db,
 	}
+}
+
+func (db *blogConnection) GetTotalData(ctx context.Context) (int64, error) {
+	var totalData int64
+	bc := db.connection.Model(&entity.Blog{}).Count(&totalData)
+	if bc.Error != nil {
+		return 0, bc.Error
+	}
+	return totalData, nil
 }
 
 func(db *blogConnection) CreateBlog(ctx context.Context, blog entity.Blog) (entity.Blog, error) {
@@ -94,4 +107,19 @@ func(db *blogConnection) LikeBlogByID(ctx context.Context, blogID string) (error
 	blog.LikeCount = blog.LikeCount + 1
 	db.UpdateBlog(ctx, blog)
 	return nil
+}
+
+func (db *blogConnection) GetAllBlogPagination(ctx context.Context, pagination entity.Pagination) (dto.PaginationResponse, error) {
+	var paginationResponse dto.PaginationResponse
+	var blogList []*entity.Blog
+
+	totalData, _ := db.GetTotalData(ctx)
+
+	db.connection.Debug().Scopes(common.PaginationOffset(&pagination, totalData)).Find(&blogList)
+	pagination.DataPerPage = blogList
+	paginationResponse.DataPerPage = blogList
+	paginationResponse.Meta.MaxPage = pagination.MaxPage
+	paginationResponse.Meta.Page = pagination.Page
+	paginationResponse.Meta.TotalData = pagination.TotalData
+	return paginationResponse, nil
 }

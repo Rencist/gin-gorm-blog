@@ -17,6 +17,7 @@ type BlogService interface {
 	LikeBlogByID(ctx context.Context, blogID string) (error)
 	ValidateBlogUser(ctx context.Context, userID string, blogID string) (bool)
 	UpdateBlog(ctx context.Context, blogDTO dto.BlogUpdateDto) (error)
+	GetAllBlogPagination(ctx context.Context, pagination entity.Pagination) (dto.PaginationResponse, error)
 }
 
 type blogService struct {
@@ -72,4 +73,8 @@ func(bs *blogService) UpdateBlog(ctx context.Context, blogDTO dto.BlogUpdateDto)
 		return err
 	}
 	return bs.blogRepository.UpdateBlog(ctx, blog)
+}
+
+func(bs *blogService) GetAllBlogPagination(ctx context.Context, pagination entity.Pagination) (dto.PaginationResponse, error) {
+	return bs.blogRepository.GetAllBlogPagination(ctx, pagination)
 }

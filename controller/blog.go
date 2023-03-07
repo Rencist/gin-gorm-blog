@@ -3,8 +3,10 @@ package controller
 import (
 	"gin-gorm-blog/common"
 	"gin-gorm-blog/dto"
+	"gin-gorm-blog/entity"
 	"gin-gorm-blog/service"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -17,6 +19,7 @@ type BlogController interface {
 	GetBlogByID(ctx *gin.Context)
 	LikeBlogByID(ctx *gin.Context)
 	UpdateBlog(ctx *gin.Context)
+	GetAllBlogPagination(ctx *gin.Context)
 }
 
 type blogController struct {
@@ -147,5 +150,29 @@ func(bc *blogController) UpdateBlog(ctx *gin.Context) {
 		return
 	}
 	res := common.BuildResponse(true, "Berhasil Mengupdate Blog", common.EmptyObj{})
+	ctx.JSON(http.StatusOK, res)
+}
+
+func(bc *blogController) GetAllBlogPagination(ctx *gin.Context) {
+	var pagination entity.Pagination
+	page, _ := strconv.Atoi(ctx.Query("page"))
+	if page <= 0 {
+		page = 1
+	}
+	pagination.Page = page
+
+	perPage, _ := strconv.Atoi(ctx.Query("per_page"))
+	if perPage <= 0 {
+		perPage = 5
+	}
+	pagination.PerPage = perPage
+
+	result, err := bc.blogService.GetAllBlogPagination(ctx.Request.Context(), pagination)
+	if err != nil {
+		res := common.BuildErrorResponse("Gagal Mendapatkan List Blog", err.Error(), common.EmptyObj{})
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+	res := common.BuildResponse(true, "Berhasil Mendapatkan List Blog", result)
 	ctx.JSON(http.StatusOK, res)
 }
