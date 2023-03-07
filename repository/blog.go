@@ -12,6 +12,7 @@ type BlogRepository interface {
 	CreateBlog(ctx context.Context, blog entity.Blog) (entity.Blog, error)
 	GetAllBlog(ctx context.Context) ([]entity.Blog, error)
 	FindBlogByUserID(ctx context.Context, userID string) ([]entity.Blog, error)
+	FindBlogByID(ctx context.Context, blogID string) (entity.Blog, error)
 }
 
 type blogConnection struct {
@@ -51,4 +52,13 @@ func(db *blogConnection) FindBlogByUserID(ctx context.Context, userID string) ([
 		return []entity.Blog{}, nil
 	}
 	return listBlog, nil
+}
+
+func(db *blogConnection) FindBlogByID(ctx context.Context, blogID string) (entity.Blog, error) {
+	var blog entity.Blog
+	bc := db.connection.Where("id = ?", blogID).Find(&blog)
+	if bc.Error != nil {
+		return entity.Blog{}, bc.Error
+	}
+	return blog, nil
 }

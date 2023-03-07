@@ -14,5 +14,6 @@ func BlogRoutes(router *gin.Engine, BlogController controller.BlogController, jw
 		userRoutes.POST("", middleware.Authenticate(jwtService), BlogController.CreateBlog)
 		userRoutes.GET("", BlogController.GetAllBlog)
 		userRoutes.GET("/posts/:id", BlogController.GetUserBlog)
+		userRoutes.GET("/:id", BlogController.GetBlogByID)
 	}
 }

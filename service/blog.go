@@ -13,6 +13,7 @@ type BlogService interface {
 	CreateBlog(ctx context.Context, blogDTO dto.BlogCreateDto) (entity.Blog, error)
 	GetAllBlog(ctx context.Context) ([]entity.Blog, error)
 	GetUserBlog(ctx context.Context, userID string) ([]entity.Blog, error)
+	GetBlogByID(ctx context.Context, blogID string) (entity.Blog, error)
 }
 
 type blogService struct {
@@ -40,4 +41,8 @@ func(bs *blogService) GetAllBlog(ctx context.Context) ([]entity.Blog, error) {
 
 func(bs *blogService) GetUserBlog(ctx context.Context, userID string) ([]entity.Blog, error) {
 	return bs.blogRepository.FindBlogByUserID(ctx, userID)
+}
+
+func(bs *blogService) GetBlogByID(ctx context.Context, blogID string) (entity.Blog, error) {
+	return bs.blogRepository.FindBlogByID(ctx, blogID)
 }
