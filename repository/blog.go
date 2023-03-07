@@ -13,6 +13,7 @@ type BlogRepository interface {
 	GetAllBlog(ctx context.Context) ([]entity.Blog, error)
 	FindBlogByUserID(ctx context.Context, userID string) ([]entity.Blog, error)
 	FindBlogByID(ctx context.Context, blogID string) (entity.Blog, error)
+	UpdateBlog(ctx context.Context, blog entity.Blog) (error)
 }
 
 type blogConnection struct {
@@ -60,5 +61,15 @@ func(db *blogConnection) FindBlogByID(ctx context.Context, blogID string) (entit
 	if bc.Error != nil {
 		return entity.Blog{}, bc.Error
 	}
+	blog.WatchCount = blog.WatchCount + 1
+	db.UpdateBlog(ctx, blog)
 	return blog, nil
+}
+
+func(db *blogConnection) UpdateBlog(ctx context.Context, blog entity.Blog) (error) {
+	bc := db.connection.Updates(&blog)
+	if bc.Error != nil {
+		return bc.Error
+	}
+	return nil
 }
