@@ -56,7 +56,7 @@ func(db *userConnection) FindUserByEmail(ctx context.Context, email string) (ent
 
 func(db *userConnection) FindUserByID(ctx context.Context, userID uuid.UUID) (entity.User, error) {
 	var user entity.User
-	ux := db.connection.Where("id = ?", userID).Take(&user)
+	ux := db.connection.Preload("Blogs").Where("id = ?", userID).Take(&user)
 	if ux.Error != nil {
 		return user, ux.Error
 	}
