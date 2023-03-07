@@ -35,11 +35,16 @@ func main() {
 		blogRepository repository.BlogRepository = repository.NewBlogRepository(db)
 		blogService service.BlogService = service.NewBlogService(blogRepository)
 		blogController controller.BlogController = controller.NewBlogController(blogService, jwtService)
+
+		commentRepository repository.CommentRepository = repository.NewCommentRepository(db)
+		commentService service.CommentService = service.NewCommentService(commentRepository)
+		commentController controller.CommentController = controller.NewCommentController(commentService)
 	)
 
 	server := gin.Default()
 	routes.UserRoutes(server, userController, jwtService)
 	routes.BlogRoutes(server, blogController, jwtService)
+	routes.CommentRoutes(server, commentController)
 
 	port := os.Getenv("PORT")
 	if port == "" {

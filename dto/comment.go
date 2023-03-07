@@ -6,7 +6,7 @@ import (
 
 type CommentCreateDto struct {
 	ID        			uuid.UUID   `gorm:"primary_key" json:"id" form:"id"`
-	Description 		string 		`json:"description" form:"description"`
+	Description 		string 		`json:"description" form:"description" binding:"required"`
 
-	BlogID 		uuid.UUID 	`gorm:"foreignKey" json:"blog_id" form:"blog_id" binding:"required"`
+	BlogID 		uuid.UUID 	`gorm:"foreignKey" json:"blog_id" form:"blog_id"`
 }
