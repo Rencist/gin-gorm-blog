@@ -15,7 +15,7 @@ type BlogRepository interface {
 	FindBlogByID(ctx context.Context, blogID string) (entity.Blog, error)
 	UpdateBlog(ctx context.Context, blog entity.Blog) (error)
 	LikeBlogByID(ctx context.Context, blogID string) (error)
-	CheckBlogCommentByID(ctx context.Context, userID string) (entity.Blog, error)
+	CheckBlogCommentByID(ctx context.Context, blogID string) (entity.Blog, error)
 }
 
 type blogConnection struct {

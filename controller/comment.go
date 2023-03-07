@@ -63,6 +63,7 @@ func(cc *commentController) UpdateComment(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
+	
 	comment.ID, _ = uuid.Parse(commentID)
 	token := ctx.MustGet("token").(string)
 	userID, err := cc.jwtService.GetUserIDByToken(token)

@@ -17,11 +17,13 @@ type CommentService interface {
 
 type commentService struct {
 	commentRepository repository.CommentRepository
+	blogRepository repository.BlogRepository
 }
 
-func NewCommentService(cc repository.CommentRepository) CommentService {
+func NewCommentService(cc repository.CommentRepository, br repository.BlogRepository) CommentService {
 	return &commentService{
 		commentRepository: cc,
+		blogRepository: br,
 	}
 }
 
@@ -44,5 +46,13 @@ func(cs *commentService) UpdateComment(ctx context.Context, commentDTO dto.Comme
 }
 
 func(cs *commentService) ValidateCommentUser(ctx context.Context, userID string, commentID string) (bool) {
-	return cs.commentRepository.ValidateCommentUser(ctx, userID, commentID) 
+	comment, err := cs.commentRepository.FindCommentByID(ctx, commentID)
+	if err != nil {
+		return false
+	}
+	blog, err := cs.blogRepository.CheckBlogCommentByID(ctx, comment.BlogID.String())
+	if blog.UserID.String() == userID {
+		return true
+	}
+	return false
 }

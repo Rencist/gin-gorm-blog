@@ -36,8 +36,8 @@ func main() {
 		blogService service.BlogService = service.NewBlogService(blogRepository)
 		blogController controller.BlogController = controller.NewBlogController(blogService, jwtService)
 
-		commentRepository repository.CommentRepository = repository.NewCommentRepository(db, blogRepository)
-		commentService service.CommentService = service.NewCommentService(commentRepository)
+		commentRepository repository.CommentRepository = repository.NewCommentRepository(db)
+		commentService service.CommentService = service.NewCommentService(commentRepository, blogRepository)
 		commentController controller.CommentController = controller.NewCommentController(commentService, jwtService)
 	)
 

@@ -15,6 +15,8 @@ type BlogService interface {
 	GetUserBlog(ctx context.Context, userID string) ([]entity.Blog, error)
 	GetBlogByID(ctx context.Context, blogID string) (entity.Blog, error)
 	LikeBlogByID(ctx context.Context, blogID string) (error)
+	ValidateBlogUser(ctx context.Context, userID string, blogID string) (bool)
+	UpdateBlog(ctx context.Context, blogDTO dto.BlogUpdateDto) (error)
 }
 
 type blogService struct {
@@ -50,4 +52,24 @@ func(bs *blogService) GetBlogByID(ctx context.Context, blogID string) (entity.Bl
 
 func(bs *blogService) LikeBlogByID(ctx context.Context, blogID string) (error) {
 	return bs.blogRepository.LikeBlogByID(ctx, blogID)
+}
+
+func(bs *blogService) ValidateBlogUser(ctx context.Context, userID string, blogID string) (bool) {
+	blog, err := bs.blogRepository.CheckBlogCommentByID(ctx, blogID)
+	if err != nil {
+		return false
+	}
+	if blog.UserID.String() == userID {
+		return true
+	}
+	return false
+}
+
+func(bs *blogService) UpdateBlog(ctx context.Context, blogDTO dto.BlogUpdateDto) (error) {
+	blog := entity.Blog{}
+	err := smapping.FillStruct(&blog, smapping.MapFields(blogDTO))
+	if err != nil {
+		return err
+	}
+	return bs.blogRepository.UpdateBlog(ctx, blog)
 }

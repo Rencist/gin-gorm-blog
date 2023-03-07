@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type BlogController interface {
@@ -15,6 +16,7 @@ type BlogController interface {
 	GetUserBlog(ctx *gin.Context)
 	GetBlogByID(ctx *gin.Context)
 	LikeBlogByID(ctx *gin.Context)
+	UpdateBlog(ctx *gin.Context)
 }
 
 type blogController struct {
@@ -109,5 +111,41 @@ func(bc *blogController) LikeBlogByID(ctx *gin.Context) {
 	}
 
 	res := common.BuildResponse(true, "Berhasil Like Blog", common.EmptyObj{})
+	ctx.JSON(http.StatusOK, res)
+}
+
+func(bc *blogController) UpdateBlog(ctx *gin.Context) {
+	blogID := ctx.Param("id")
+	var blog dto.BlogUpdateDto
+	err := ctx.ShouldBind(&blog)
+	if err != nil {
+		res := common.BuildErrorResponse("Gagal Mengupdate Blog", err.Error(), common.EmptyObj{})
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	blog.ID, _ = uuid.Parse(blogID)
+	token := ctx.MustGet("token").(string)
+	userID, err := bc.jwtService.GetUserIDByToken(token)
+	if err != nil {
+		response := common.BuildErrorResponse("Gagal Memproses Request", "Token Tidak Valid", nil)
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
+		return
+	}
+
+	checkBlogUser := bc.blogService.ValidateBlogUser(ctx, userID.String(), blogID)
+	if !checkBlogUser {
+		response := common.BuildErrorResponse("Gagal Memproses Request", "Akun Anda Tidak Memiliki Akses Untuk Mengupdate Blog Ini", nil)
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
+		return
+	}
+
+	err = bc.blogService.UpdateBlog(ctx.Request.Context(), blog)
+	if err != nil {
+		res := common.BuildErrorResponse("Gagal Mengupdate Blog", err.Error(), common.EmptyObj{})
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+	res := common.BuildResponse(true, "Berhasil Mengupdate Blog", common.EmptyObj{})
 	ctx.JSON(http.StatusOK, res)
 }
