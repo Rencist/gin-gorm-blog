@@ -34,7 +34,7 @@ func main() {
 	)
 
 	server := gin.Default()
-	routes.UserRoutes(server, userController)
+	routes.UserRoutes(server, userController, jwtService)
 
 	port := os.Getenv("PORT")
 	if port == "" {
