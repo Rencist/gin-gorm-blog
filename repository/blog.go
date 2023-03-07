@@ -58,7 +58,7 @@ func(db *blogConnection) FindBlogByUserID(ctx context.Context, userID string) ([
 
 func(db *blogConnection) FindBlogByID(ctx context.Context, blogID string) (entity.Blog, error) {
 	var blog entity.Blog
-	bc := db.connection.Where("id = ?", blogID).Find(&blog)
+	bc := db.connection.Preload("Comments").Where("id = ?", blogID).Find(&blog)
 	if bc.Error != nil {
 		return entity.Blog{}, bc.Error
 	}
