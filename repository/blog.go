@@ -15,6 +15,7 @@ type BlogRepository interface {
 	FindBlogByID(ctx context.Context, blogID string) (entity.Blog, error)
 	UpdateBlog(ctx context.Context, blog entity.Blog) (error)
 	LikeBlogByID(ctx context.Context, blogID string) (error)
+	CheckBlogCommentByID(ctx context.Context, userID string) (entity.Blog, error)
 }
 
 type blogConnection struct {
@@ -64,6 +65,15 @@ func(db *blogConnection) FindBlogByID(ctx context.Context, blogID string) (entit
 	}
 	blog.WatchCount = blog.WatchCount + 1
 	db.UpdateBlog(ctx, blog)
+	return blog, nil
+}
+
+func(db *blogConnection) CheckBlogCommentByID(ctx context.Context, blogID string) (entity.Blog, error) {
+	var blog entity.Blog
+	bc := db.connection.Preload("Comments").Where("id = ?", blogID).Find(&blog)
+	if bc.Error != nil {
+		return entity.Blog{}, bc.Error
+	}
 	return blog, nil
 }
 
