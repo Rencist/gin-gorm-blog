@@ -7,6 +7,7 @@ import (
 	"gin-gorm-blog/helpers"
 	"gin-gorm-blog/repository"
 
+	"github.com/google/uuid"
 	"github.com/mashingan/smapping"
 )
 
@@ -16,6 +17,7 @@ type UserService interface {
 	FindUserByEmail(ctx context.Context, email string) (entity.User, error)
 	Verify(ctx context.Context, email string, password string) (bool, error)
 	CheckUser(ctx context.Context, email string) ( bool, error)
+	DeleteUser(ctx context.Context, userID uuid.UUID) (error)
 }
 
 type userService struct {
@@ -71,4 +73,8 @@ func(us *userService) CheckUser(ctx context.Context, email string) (bool, error)
 		return false, nil
 	}
 	return true, nil
+}
+
+func(us *userService) DeleteUser(ctx context.Context, userID uuid.UUID) (error) {
+	return us.userRepository.DeleteUser(ctx, userID)
 }

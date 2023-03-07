@@ -14,6 +14,7 @@ type UserController interface {
 	RegisterUser(ctx *gin.Context)
 	GetAllUser(ctx *gin.Context)
 	LoginUser(ctx *gin.Context)
+	DeleteUser(ctx *gin.Context)
 }
 
 type userController struct {
@@ -84,4 +85,24 @@ func(uc *userController) LoginUser(ctx *gin.Context) {
 	
 	response := common.BuildResponse(true, "Berhasil Login", userResponse)
 	ctx.JSON(http.StatusOK, response)
+}
+
+func(uc *userController) DeleteUser(ctx *gin.Context) {
+	token := ctx.MustGet("token").(string)
+	userID, err := uc.jwtService.GetUserIDByToken(token)
+	// ctx.Set("token", "")
+	// ctx.Set("userID", "")
+	if err != nil {
+		response := common.BuildErrorResponse("Gagal Memproses Request", "Token Tidak Valid", nil)
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
+		return
+	}
+	err = uc.userService.DeleteUser(ctx.Request.Context(), userID)
+	if err != nil {
+		res := common.BuildErrorResponse("Gagal Menghapus User", err.Error(), common.EmptyObj{})
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+	res := common.BuildResponse(true, "Berhasil Menghapus User", common.EmptyObj{})
+	ctx.JSON(http.StatusOK, res)
 }

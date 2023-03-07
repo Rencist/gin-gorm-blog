@@ -12,6 +12,7 @@ type UserRepository interface {
 	RegisterUser(ctx context.Context, user entity.User) (entity.User, error)
 	GetAllUser(ctx context.Context) ([]entity.User, error)
 	FindUserByEmail(ctx context.Context, email string) (entity.User, error)
+	DeleteUser(ctx context.Context, userID uuid.UUID) (error)
 }
 
 type userConnection struct {
@@ -49,4 +50,12 @@ func(db *userConnection) FindUserByEmail(ctx context.Context, email string) (ent
 		return user, ux.Error
 	}
 	return user, nil
+}
+
+func(db *userConnection) DeleteUser(ctx context.Context, userID uuid.UUID) (error) {
+	uc := db.connection.Delete(&entity.User{}, &userID)
+	if uc.Error != nil {
+		return uc.Error
+	}
+	return nil
 }
