@@ -12,6 +12,6 @@ func CommentRoutes(router *gin.Engine, CommentController controller.CommentContr
 	userRoutes := router.Group("/api/comment")
 	{
 		userRoutes.POST("/:id", CommentController.CreateComment)
-		userRoutes.PUT("/:id", middleware.Authenticate(jwtService), CommentController.UpdateComment)
+		userRoutes.PUT("/:id", middleware.Authenticate(jwtService, false), CommentController.UpdateComment)
 	}
 }

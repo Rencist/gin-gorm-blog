@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Authenticate(jwtService service.JWTService) gin.HandlerFunc {
+func Authenticate(jwtService service.JWTService, isAdmin bool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authHeader := ctx.GetHeader("Authorization")
 		if authHeader == "" {
@@ -34,6 +34,21 @@ func Authenticate(jwtService service.JWTService) gin.HandlerFunc {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
 		}
+		// Cek Admin
+		if isAdmin {
+			userRole, err := jwtService.GetUserRoleByToken(authHeader)
+			if err != nil {
+				response := common.BuildErrorResponse("Gagal Memproses Request", "Token Tidak Valid", nil)
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
+				return
+			}
+			if userRole != "admin" {
+				response := common.BuildErrorResponse("Gagal Memproses Request", "Role User Tidak Memiliki Akses ke Endpoint Ini", nil)
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
+				return
+			}
+		}
+
 		userID, err := jwtService.GetUserIDByToken(authHeader)
 		if err != nil {
 			response := common.BuildErrorResponse("Gagal Memproses Request", err.Error(), nil)

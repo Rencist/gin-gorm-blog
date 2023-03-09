@@ -12,10 +12,10 @@ func UserRoutes(router *gin.Engine, UserController controller.UserController, jw
 	userRoutes := router.Group("/api/user")
 	{
 		userRoutes.POST("", UserController.RegisterUser)
-		userRoutes.GET("", middleware.Authenticate(jwtService), UserController.GetAllUser)
+		userRoutes.GET("", middleware.Authenticate(jwtService, true), UserController.GetAllUser)
 		userRoutes.POST("/login", UserController.LoginUser)
-		userRoutes.DELETE("/", middleware.Authenticate(jwtService), UserController.DeleteUser)
-		userRoutes.PUT("/", middleware.Authenticate(jwtService), UserController.UpdateUser)
-		userRoutes.GET("/me", middleware.Authenticate(jwtService), UserController.MeUser)
+		userRoutes.DELETE("/", middleware.Authenticate(jwtService, false), UserController.DeleteUser)
+		userRoutes.PUT("/", middleware.Authenticate(jwtService, false), UserController.UpdateUser)
+		userRoutes.GET("/me", middleware.Authenticate(jwtService, false), UserController.MeUser)
 	}
 }
