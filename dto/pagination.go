@@ -1,5 +1,7 @@
 package dto
 
+import "gin-gorm-blog/entity"
+
 type Meta struct {
 	Page      int   `json:"page"`
 	MaxPage   int   `json:"max_page"`
@@ -9,4 +11,10 @@ type Meta struct {
 type PaginationResponse struct {
 	DataPerPage any  `json:"data_per_page"`
 	Meta        Meta `json:"meta"`
+}
+
+type BlogPaginationResponse struct {
+	Blog  			entity.Blog			`json:"blog"`
+	Comments    	[]entity.Comment	`json:"comment_per_page"`
+	Meta        	Meta 				`json:"meta"`
 }

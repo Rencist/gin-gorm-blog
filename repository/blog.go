@@ -15,7 +15,7 @@ type BlogRepository interface {
 	CreateBlog(ctx context.Context, blog entity.Blog) (entity.Blog, error)
 	GetAllBlog(ctx context.Context) ([]entity.Blog, error)
 	FindBlogByUserID(ctx context.Context, userID string) ([]entity.Blog, error)
-	FindBlogByID(ctx context.Context, blogID string) (entity.Blog, error)
+	FindBlogByID(ctx context.Context, pagination entity.Pagination, blogID string) (dto.BlogPaginationResponse, error)
 	UpdateBlog(ctx context.Context, blog entity.Blog) (error)
 	LikeBlogByID(ctx context.Context, blogID string) (error)
 	CheckBlogCommentByID(ctx context.Context, blogID string) (entity.Blog, error)
@@ -24,11 +24,13 @@ type BlogRepository interface {
 
 type blogConnection struct {
 	connection *gorm.DB
+	commentRepository CommentRepository
 }
 
-func NewBlogRepository(db *gorm.DB) BlogRepository {
+func NewBlogRepository(db *gorm.DB, cr CommentRepository) BlogRepository {
 	return &blogConnection{
 		connection: db,
+		commentRepository: cr,
 	}
 }
 
@@ -70,15 +72,28 @@ func(db *blogConnection) FindBlogByUserID(ctx context.Context, userID string) ([
 	return listBlog, nil
 }
 
-func(db *blogConnection) FindBlogByID(ctx context.Context, blogID string) (entity.Blog, error) {
+func(db *blogConnection) FindBlogByID(ctx context.Context, pagination entity.Pagination, blogID string) (dto.BlogPaginationResponse, error) {
+	var blogPaginationResponse dto.BlogPaginationResponse
 	var blog entity.Blog
-	bc := db.connection.Preload("Comments").Where("id = ?", blogID).Find(&blog)
+	var comment []entity.Comment
+
+	totalData, _ := db.commentRepository.GetTotalDataByBlogID(ctx, blogID)
+	db.connection.Where("id = ?", blogID).Find(&blog)	
+	bc := db.connection.Debug().Scopes(common.Pagination(&pagination, totalData)).Find(&comment)
 	if bc.Error != nil {
-		return entity.Blog{}, bc.Error
+		return dto.BlogPaginationResponse{}, bc.Error
 	}
+
+	blogPaginationResponse.Comments = comment
+	blogPaginationResponse.Meta.MaxPage = pagination.MaxPage
+	blogPaginationResponse.Meta.Page = pagination.Page
+	blogPaginationResponse.Meta.TotalData = pagination.TotalData
+	blogPaginationResponse.Blog = blog
+
+	blog.Comments = comment
 	blog.WatchCount = blog.WatchCount + 1
 	db.UpdateBlog(ctx, blog)
-	return blog, nil
+	return blogPaginationResponse, nil
 }
 
 func(db *blogConnection) CheckBlogCommentByID(ctx context.Context, blogID string) (entity.Blog, error) {
@@ -115,7 +130,7 @@ func (db *blogConnection) GetAllBlogPagination(ctx context.Context, pagination e
 
 	totalData, _ := db.GetTotalData(ctx)
 
-	db.connection.Debug().Scopes(common.PaginationOffset(&pagination, totalData)).Find(&blogList)
+	db.connection.Debug().Scopes(common.Pagination(&pagination, totalData)).Find(&blogList)
 	pagination.DataPerPage = blogList
 	paginationResponse.DataPerPage = blogList
 	paginationResponse.Meta.MaxPage = pagination.MaxPage

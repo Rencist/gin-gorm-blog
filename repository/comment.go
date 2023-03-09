@@ -9,6 +9,7 @@ import (
 )
 
 type CommentRepository interface {
+	GetTotalDataByBlogID(ctx context.Context, blogID string) (int64, error)
 	CreateComment(ctx context.Context, comment entity.Comment) (entity.Comment, error)
 	UpdateComment(ctx context.Context, comment entity.Comment) (error)
 	FindCommentByID(ctx context.Context, commentID string) (entity.Comment, error)
@@ -22,6 +23,15 @@ func NewCommentRepository(db *gorm.DB) CommentRepository {
 	return &commentConnection{
 		connection: db,
 	}
+}
+
+func(db *commentConnection) GetTotalDataByBlogID(ctx context.Context, blogID string) (int64, error) {
+	var totalData int64
+	cc := db.connection.Model(&entity.Comment{}).Where("blog_id = ?", blogID).Count(&totalData)
+	if cc.Error != nil {
+		return 0, cc.Error
+	}
+	return totalData, nil
 }
 
 func(db *commentConnection) CreateComment(ctx context.Context, comment entity.Comment) (entity.Comment, error) {

@@ -13,7 +13,7 @@ type BlogService interface {
 	CreateBlog(ctx context.Context, blogDTO dto.BlogCreateDto) (entity.Blog, error)
 	GetAllBlog(ctx context.Context) ([]entity.Blog, error)
 	GetUserBlog(ctx context.Context, userID string) ([]entity.Blog, error)
-	GetBlogByID(ctx context.Context, blogID string) (entity.Blog, error)
+	GetBlogByID(ctx context.Context, pagination entity.Pagination, blogID string) (dto.BlogPaginationResponse, error)
 	LikeBlogByID(ctx context.Context, blogID string) (error)
 	ValidateBlogUser(ctx context.Context, userID string, blogID string) (bool)
 	UpdateBlog(ctx context.Context, blogDTO dto.BlogUpdateDto) (error)
@@ -47,8 +47,8 @@ func(bs *blogService) GetUserBlog(ctx context.Context, userID string) ([]entity.
 	return bs.blogRepository.FindBlogByUserID(ctx, userID)
 }
 
-func(bs *blogService) GetBlogByID(ctx context.Context, blogID string) (entity.Blog, error) {
-	return bs.blogRepository.FindBlogByID(ctx, blogID)
+func(bs *blogService) GetBlogByID(ctx context.Context, pagination entity.Pagination, blogID string) (dto.BlogPaginationResponse, error) {
+	return bs.blogRepository.FindBlogByID(ctx, pagination, blogID)
 }
 
 func(bs *blogService) LikeBlogByID(ctx context.Context, blogID string) (error) {

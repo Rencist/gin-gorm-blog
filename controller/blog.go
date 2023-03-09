@@ -88,13 +88,25 @@ func(bc *blogController) GetUserBlog(ctx *gin.Context) {
 
 func(bc *blogController) GetBlogByID(ctx *gin.Context) {
 	BlogID := ctx.Param("id")
-	result, err := bc.blogService.GetBlogByID(ctx.Request.Context(), BlogID)
+	var pagination entity.Pagination
+	page, _ := strconv.Atoi(ctx.Query("page"))
+	if page <= 0 {
+		page = 1
+	}
+	pagination.Page = page
+
+	perPage, _ := strconv.Atoi(ctx.Query("per_page"))
+	if perPage <= 0 {
+		perPage = 5
+	}
+	pagination.PerPage = perPage
+	result, err := bc.blogService.GetBlogByID(ctx.Request.Context(), pagination, BlogID)
 	if err != nil {
 		res := common.BuildErrorResponse("Gagal Mendapatkan Blog", err.Error(), common.EmptyObj{})
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
-	if result.Title == "" {
+	if result.Blog.Title == "" {
 		res := common.BuildErrorResponse("Gagal Mendapatkan Blog", "Blog Tidak Ditemukan", common.EmptyObj{})
 		ctx.JSON(http.StatusBadRequest, res)
 		return
