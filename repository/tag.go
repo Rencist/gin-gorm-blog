@@ -9,6 +9,7 @@ import (
 
 type TagRepository interface {
 	FindTagByName(ctx context.Context, name string) (entity.Tag, error)
+	FindTagByID(ctx context.Context, id string) (entity.Tag, error)
 }
 
 type tagConnection struct {
@@ -24,6 +25,15 @@ func NewTagRepository(db *gorm.DB) TagRepository {
 func(db *tagConnection) FindTagByName(ctx context.Context, name string) (entity.Tag, error) {
 	var tag entity.Tag
 	tc := db.connection.Where("name = ?", name).Find(&tag)
+	if tc.Error != nil {
+		return entity.Tag{}, tc.Error
+	}
+	return tag, nil
+}
+
+func(db *tagConnection) FindTagByID(ctx context.Context, id string) (entity.Tag, error) {
+	var tag entity.Tag
+	tc := db.connection.Where("id = ?", id).Find(&tag)
 	if tc.Error != nil {
 		return entity.Tag{}, tc.Error
 	}

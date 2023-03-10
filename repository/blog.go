@@ -25,12 +25,16 @@ type BlogRepository interface {
 type blogConnection struct {
 	connection *gorm.DB
 	commentRepository CommentRepository
+	userRepository UserRepository
+	tagRepository TagRepository
 }
 
-func NewBlogRepository(db *gorm.DB, cr CommentRepository) BlogRepository {
+func NewBlogRepository(db *gorm.DB, cr CommentRepository, ur UserRepository, tr TagRepository) BlogRepository {
 	return &blogConnection{
 		connection: db,
 		commentRepository: cr,
+		userRepository: ur,
+		tagRepository: tr,
 	}
 }
 
@@ -76,19 +80,41 @@ func(db *blogConnection) FindBlogByID(ctx context.Context, pagination entity.Pag
 	var blogPaginationResponse dto.BlogPaginationResponse
 	var blog entity.Blog
 	var comment []entity.Comment
+	var tag []entity.Tag
+	var user entity.User
 
 	totalData, _ := db.commentRepository.GetTotalDataByBlogID(ctx, blogID)
-	db.connection.Where("id = ?", blogID).Find(&blog)	
+	db.connection.Preload("BlogTags").Where("id = ?", blogID).Find(&blog)	
 	bc := db.connection.Debug().Scopes(common.Pagination(&pagination, totalData)).Find(&comment)
 	if bc.Error != nil {
 		return dto.BlogPaginationResponse{}, bc.Error
+	}
+	user, err := db.userRepository.FindUserByID(ctx, blog.UserID)
+	if err != nil {
+		return dto.BlogPaginationResponse{}, err
+	}
+	for _, bt := range blog.BlogTags {
+		lmao, _ := db.tagRepository.FindTagByID(ctx, bt.TagID.String())
+		tag = append(tag, lmao)
+	}
+	blogResponse := &dto.BlogResponseDto{
+		ID: blog.ID,
+		UserName: user.Name,
+		Title: blog.Title,
+		Slug: blog.Slug,
+		Description: blog.Description,
+		LikeCount: blog.LikeCount,
+		WatchCount: blog.WatchCount,
+		UserID: blog.UserID,
+		Timestamp: blog.Timestamp,
 	}
 
 	blogPaginationResponse.Comments = comment
 	blogPaginationResponse.Meta.MaxPage = pagination.MaxPage
 	blogPaginationResponse.Meta.Page = pagination.Page
 	blogPaginationResponse.Meta.TotalData = pagination.TotalData
-	blogPaginationResponse.Blog = blog
+	blogPaginationResponse.Blog = *blogResponse
+	blogPaginationResponse.Tags = tag
 
 	blog.Comments = comment
 	blog.WatchCount = blog.WatchCount + 1

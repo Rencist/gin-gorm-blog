@@ -14,7 +14,8 @@ type PaginationResponse struct {
 }
 
 type BlogPaginationResponse struct {
-	Blog  			entity.Blog			`json:"blog"`
+	Blog  			BlogResponseDto		`json:"blog"`
+	Tags			[]entity.Tag		`json:"tag"`
 	Comments    	[]entity.Comment	`json:"comment_per_page"`
 	Meta        	Meta 				`json:"meta"`
 }
