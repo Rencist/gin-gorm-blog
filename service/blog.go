@@ -6,6 +6,7 @@ import (
 	"gin-gorm-blog/entity"
 	"gin-gorm-blog/repository"
 
+	"github.com/google/uuid"
 	"github.com/mashingan/smapping"
 )
 
@@ -18,6 +19,7 @@ type BlogService interface {
 	ValidateBlogUser(ctx context.Context, userID string, blogID string) (bool)
 	UpdateBlog(ctx context.Context, blogDTO dto.BlogUpdateDto) (error)
 	GetAllBlogPagination(ctx context.Context, pagination entity.Pagination) (dto.PaginationResponse, error)
+	AssignTag(ctx context.Context, blogTagDTO dto.BlogTagCreateDto) (error)
 }
 
 type blogService struct {
@@ -96,4 +98,15 @@ func(bs *blogService) UpdateBlog(ctx context.Context, blogDTO dto.BlogUpdateDto)
 
 func(bs *blogService) GetAllBlogPagination(ctx context.Context, pagination entity.Pagination) (dto.PaginationResponse, error) {
 	return bs.blogRepository.GetAllBlogPagination(ctx, pagination)
+}
+
+func(bs *blogService) AssignTag(ctx context.Context, blogTagDTO dto.BlogTagCreateDto) (error) {
+	blogUUID, _ := uuid.Parse(blogTagDTO.BlogID)
+	tagUUID, _ := uuid.Parse(blogTagDTO.TagID)
+	blogTag := entity.BlogTag{
+		BlogID: blogUUID,
+		TagID: tagUUID,
+	}
+	_, error := bs.blogTagRepository.CreateBlogTag(ctx, blogTag)
+	return error
 }

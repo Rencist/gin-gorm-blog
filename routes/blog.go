@@ -17,5 +17,6 @@ func BlogRoutes(router *gin.Engine, BlogController controller.BlogController, jw
 		userRoutes.GET("/:id", BlogController.GetBlogByID)
 		userRoutes.GET("/like/:id", BlogController.LikeBlogByID)
 		userRoutes.PUT("/:id", middleware.Authenticate(jwtService, false), BlogController.UpdateBlog)
+		userRoutes.POST("/assign", middleware.Authenticate(jwtService, false), BlogController.AssignTag)
 	}
 }

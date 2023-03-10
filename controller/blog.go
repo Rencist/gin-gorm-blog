@@ -20,6 +20,7 @@ type BlogController interface {
 	LikeBlogByID(ctx *gin.Context)
 	UpdateBlog(ctx *gin.Context)
 	GetAllBlogPagination(ctx *gin.Context)
+	AssignTag(ctx *gin.Context)
 }
 
 type blogController struct {
@@ -186,5 +187,38 @@ func(bc *blogController) GetAllBlogPagination(ctx *gin.Context) {
 		return
 	}
 	res := common.BuildResponse(true, "Berhasil Mendapatkan List Blog", result)
+	ctx.JSON(http.StatusOK, res)
+}
+
+func(bc *blogController) AssignTag(ctx *gin.Context) {
+	var blogTag dto.BlogTagCreateDto
+	err := ctx.ShouldBind(&blogTag)
+	if err != nil {
+		res := common.BuildErrorResponse("Gagal Mengupdate Blog", err.Error(), common.EmptyObj{})
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+	token := ctx.MustGet("token").(string)
+	userID, err := bc.jwtService.GetUserIDByToken(token)
+	if err != nil {
+		response := common.BuildErrorResponse("Gagal Memproses Request", "Token Tidak Valid", nil)
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
+		return
+	}
+
+	checkBlogUser := bc.blogService.ValidateBlogUser(ctx, userID.String(), blogTag.BlogID)
+	if !checkBlogUser {
+		response := common.BuildErrorResponse("Gagal Memproses Request", "Akun Anda Tidak Memiliki Akses Untuk Mengupdate Blog Ini", nil)
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
+		return
+	}
+
+	err = bc.blogService.AssignTag(ctx, blogTag)
+	if err != nil {
+		res := common.BuildErrorResponse("Gagal Mengupdate Blog", err.Error(), common.EmptyObj{})
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+	res := common.BuildResponse(true, "Berhasil Mengupdate Blog", common.EmptyObj{})
 	ctx.JSON(http.StatusOK, res)
 }

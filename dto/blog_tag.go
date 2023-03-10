@@ -7,6 +7,6 @@ import (
 type BlogTagCreateDto struct {
 	ID        		uuid.UUID   `gorm:"primary_key" json:"id" form:"id"`
 
-	BlogID 		uuid.UUID 	`gorm:"foreignKey" json:"blog_id" form:"blog_id" binding:"required"`
-	TagID 		uuid.UUID 	`gorm:"foreignKey" json:"tag_id" form:"tag_id" binding:"required"`
+	BlogID 		string 	`gorm:"foreignKey" json:"blog_id" form:"blog_id" binding:"required"`
+	TagID 		string 	`gorm:"foreignKey" json:"tag_id" form:"tag_id" binding:"required"`
 }
