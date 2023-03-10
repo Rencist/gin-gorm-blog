@@ -194,7 +194,7 @@ func(bc *blogController) AssignTag(ctx *gin.Context) {
 	var blogTag dto.BlogTagCreateDto
 	err := ctx.ShouldBind(&blogTag)
 	if err != nil {
-		res := common.BuildErrorResponse("Gagal Mengupdate Blog", err.Error(), common.EmptyObj{})
+		res := common.BuildErrorResponse("Gagal Menambahkan Tag ke Blog", err.Error(), common.EmptyObj{})
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
@@ -208,17 +208,17 @@ func(bc *blogController) AssignTag(ctx *gin.Context) {
 
 	checkBlogUser := bc.blogService.ValidateBlogUser(ctx, userID.String(), blogTag.BlogID)
 	if !checkBlogUser {
-		response := common.BuildErrorResponse("Gagal Memproses Request", "Akun Anda Tidak Memiliki Akses Untuk Mengupdate Blog Ini", nil)
+		response := common.BuildErrorResponse("Gagal Memproses Request", "Akun Anda Tidak Memiliki Akses Untuk Menambahkan Tag ke Blog Ini", nil)
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
 		return
 	}
 
 	err = bc.blogService.AssignTag(ctx, blogTag)
 	if err != nil {
-		res := common.BuildErrorResponse("Gagal Mengupdate Blog", err.Error(), common.EmptyObj{})
+		res := common.BuildErrorResponse("Gagal Menambahkan Tag ke Blog", err.Error(), common.EmptyObj{})
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
-	res := common.BuildResponse(true, "Berhasil Mengupdate Blog", common.EmptyObj{})
+	res := common.BuildResponse(true, "Berhasil Menambahkan Tag ke Blog", common.EmptyObj{})
 	ctx.JSON(http.StatusOK, res)
 }
