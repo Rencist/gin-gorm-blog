@@ -33,9 +33,11 @@ func main() {
 		userController controller.UserController = controller.NewUserController(userService, jwtService)
 
 		commentRepository repository.CommentRepository = repository.NewCommentRepository(db)
-		
+		tagRepository repository.TagRepository = repository.NewTagRepository(db)
+		blogTagRepository repository.BlogTagRepository = repository.NewBlogTagRepository(db)
+
 		blogRepository repository.BlogRepository = repository.NewBlogRepository(db, commentRepository)
-		blogService service.BlogService = service.NewBlogService(blogRepository)
+		blogService service.BlogService = service.NewBlogService(blogRepository, tagRepository, blogTagRepository)
 		blogController controller.BlogController = controller.NewBlogController(blogService, jwtService)
 
 		commentService service.CommentService = service.NewCommentService(commentRepository, blogRepository)

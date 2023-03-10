@@ -22,11 +22,15 @@ type BlogService interface {
 
 type blogService struct {
 	blogRepository repository.BlogRepository
+	tagRepository repository.TagRepository
+	blogTagRepository repository.BlogTagRepository
 }
 
-func NewBlogService(br repository.BlogRepository) BlogService {
+func NewBlogService(br repository.BlogRepository, tr repository.TagRepository, btr repository.BlogTagRepository) BlogService {
 	return &blogService{
 		blogRepository: br,
+		tagRepository: tr,
+		blogTagRepository: btr,
 	}
 }
 
@@ -36,7 +40,22 @@ func(bs *blogService) CreateBlog(ctx context.Context, blogDTO dto.BlogCreateDto)
 	if err != nil {
 		return blog, err
 	}
-	return bs.blogRepository.CreateBlog(ctx, blog)
+	blogCreate, err := bs.blogRepository.CreateBlog(ctx, blog)
+	if blogDTO.Tag.Name != "" {
+		tag, err := bs.tagRepository.FindTagByName(ctx, blogDTO.Tag.Name)
+		if err != nil {
+			return blog, err
+		}
+		blogTag := entity.BlogTag{
+			TagID: tag.ID,
+			BlogID: blogCreate.ID,
+		}
+		_, err = bs.blogTagRepository.CreateBlogTag(ctx, blogTag)
+		if err != nil {
+			return blog, err
+		}
+	}
+	return blogCreate, nil
 }
 
 func(bs *blogService) GetAllBlog(ctx context.Context) ([]entity.Blog, error) {

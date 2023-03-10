@@ -27,6 +27,8 @@ func SetupDatabaseConnection() *gorm.DB {
 		entity.User{},
 		entity.Blog{},
 		entity.Comment{},
+		entity.Tag{},
+		entity.BlogTag{},
 	); err != nil {
 		fmt.Println(err)
 		panic(err)
